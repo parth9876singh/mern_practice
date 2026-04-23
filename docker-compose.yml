@@ -4,31 +4,32 @@ services:
   backend:
     build: ./backend
     ports:
-      -"3000:3000"
+      - "3000:3000"
     env_file:
       - ./backend/.env
     environment:
-      - MONGO_URI: mongodb://mongo:27017/practice
+       MONGO_URI: mongodb://db:27017/practice
     depends_on:
-      - mongo
+      - db
     volumes:
       - ./backend:/app
   frontend:
     build: ./frontend
     ports:
-      -"5173:5173"
+      - "5173:5173"
     depends_on:
       - backend
     volumes:
-      -./frontend:/app
+      - ./frontend:/app
+      - /app/node_modules
   db:
     image: mongo
     ports:
-      -"27017:27017"
+      - "27017:27017"
     volumes:
-      -mongo-data:/data/db
+      - mongo-data:/data/db
 
 volumes:
-  mongo-data
+  mongo-data:
   
 
