@@ -1,41 +1,74 @@
-version: "3.9"
+version: '3.8'
 
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mern-backend-dev
     ports:
       - "3000:3000"
     env_file:
       - ./backend/.env
     environment:
-       MONGO_URI: mongodb://db:27017/practice
+      NODE_ENV: development
+      MONGO_URI: mongodb://db:27017/practice
     depends_on:
       - db
       - redis
     volumes:
       - ./backend:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - mern-network
+
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mern-frontend-dev
     ports:
-      - "5173:5173"
+      - "5173:80"
     depends_on:
       - backend
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - mern-network
+
   db:
     image: mongo
+    container_name: mern-mongodb-dev
     ports:
       - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: practice
     volumes:
       - mongo-data:/data/db
+    restart: unless-stopped
+    networks:
+      - mern-network
 
   redis:
     image: redis
     ports:
-      - "6379:6379" 
+      - "6379:6379"
+    command: redis-server
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - mern-network
 
 volumes:
   mongo-data:
-  
+    driver: local
+  redis-data:
+    driver: local
 
+networks:
+  mern-network:
+    driver: bridge
